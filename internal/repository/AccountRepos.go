@@ -19,9 +19,9 @@ type AccRepoImpl struct {
 	AccountRepo
 }
 
-func New() *AccRepoImpl {
-	s, _ := storage.New()
-	return &AccRepoImpl{s: s}
+func New(storage *storage.Storage) *AccRepoImpl {
+
+	return &AccRepoImpl{s: storage}
 }
 
 func (a *AccRepoImpl) FindAccountByLogin(login string) (*models.Account, error) {
@@ -50,10 +50,9 @@ func (a *AccRepoImpl) FindAccountByLogin(login string) (*models.Account, error) 
 func (a *AccRepoImpl) FindAllAccounts(accounts *[]models.Account) (bool, error) {
 	var acc models.Account
 
-	var db = storage.Storage{}
-	connect := db.Get()
+	db := a.s.Get()
 	query := `SELECT * FROM accounts`
-	stmt, err := connect.Prepare(query)
+	stmt, err := db.Prepare(query)
 	if err != nil {
 		return false, sql.ErrConnDone
 	}
@@ -98,4 +97,27 @@ func (a *AccRepoImpl) Update(account *models.Account) (bool, error) {
 	log.Print(exec.RowsAffected())
 	defer stmt.Close()
 	return true, nil
+}
+
+func (a *AccRepoImpl) FindAccountById(id int) (*models.Account, error) {
+	var acc models.Account
+	db := a.s.Get()
+
+	query := `SELECT * FROM accounts WHERE account_id = $1;`
+
+	rows := db.QueryRow(query, id)
+
+	//if err != nil {
+	//	return nil, err
+	//}
+
+	rows.Scan(&acc.ID,
+		&acc.FirstName,
+		&acc.SecondName,
+		&acc.Login,
+		&acc.Password)
+
+	fmt.Println(acc)
+
+	return &acc, nil
 }
