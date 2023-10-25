@@ -19,8 +19,32 @@ type AccRepoImpl struct {
 	AccountRepo
 }
 
-func New(storage *storage.Storage) *AccRepoImpl {
-	return &AccRepoImpl{s: storage}
+func New() *AccRepoImpl {
+	s, _ := storage.New()
+	return &AccRepoImpl{s: s}
+}
+
+func (a *AccRepoImpl) FindAccountByLogin(login string) (*models.Account, error) {
+	var acc models.Account
+	db := a.s.Get()
+
+	query := `SELECT * FROM accounts WHERE email = $1::TEXT;`
+
+	rows := db.QueryRow(query, login)
+
+	//if err != nil {
+	//	return nil, err
+	//}
+
+	rows.Scan(&acc.ID,
+		&acc.FirstName,
+		&acc.SecondName,
+		&acc.Login,
+		&acc.Password)
+
+	fmt.Println(acc)
+
+	return &acc, nil
 }
 
 func (a *AccRepoImpl) FindAllAccounts(accounts *[]models.Account) (bool, error) {
