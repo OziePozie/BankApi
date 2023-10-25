@@ -28,19 +28,37 @@ func (a *AccRepoImpl) FindAccountByLogin(login string) (*models.Account, error) 
 	var acc models.Account
 	db := a.s.Get()
 
+	var billId []int
+
 	query := `SELECT * FROM accounts WHERE email = $1::TEXT;`
 
-	rows := db.QueryRow(query, login)
-
-	//if err != nil {
-	//	return nil, err
-	//}
-
-	rows.Scan(&acc.ID,
+	row := db.QueryRow(query, login)
+	row.Scan(&acc.ID,
 		&acc.FirstName,
 		&acc.SecondName,
 		&acc.Login,
-		&acc.Password)
+		&acc.Password,
+	)
+
+	rows, _ := db.Query(`SELECT bill_id FROM bills WHERE account_id = $1`, acc.ID)
+
+	for rows.Next() {
+		var id int
+		rows.Scan(&id)
+		billId = append(billId, id)
+	}
+
+	for _, id := range billId {
+		rows, _ = db.Query(`SELECT bill_id,number,sum_limit FROM bills WHERE bill_id = $1`, id)
+		for rows.Next() {
+			var bill models.Bill
+			rows.Scan(&bill.ID, &bill.Number, &bill.Limit)
+			acc.Bill = append(acc.Bill, bill)
+		}
+
+	}
+
+	fmt.Println(billId)
 
 	fmt.Println(acc)
 
