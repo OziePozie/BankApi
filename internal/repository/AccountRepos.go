@@ -19,12 +19,17 @@ type AccRepoImpl struct {
 	AccountRepo
 }
 
-func (a AccRepoImpl) FindAllAccounts(accounts *[]models.Account, storage *storage.Storage) (bool, error) {
+func New(storage *storage.Storage) *AccRepoImpl {
+	return &AccRepoImpl{s: storage}
+}
+
+func (a *AccRepoImpl) FindAllAccounts(accounts *[]models.Account) (bool, error) {
 	var acc models.Account
 
-	db := storage.Get()
+	var db = storage.Storage{}
+	connect := db.Get()
 	query := `SELECT * FROM accounts`
-	stmt, err := db.Prepare(query)
+	stmt, err := connect.Prepare(query)
 	if err != nil {
 		return false, sql.ErrConnDone
 	}
@@ -42,8 +47,8 @@ func (a AccRepoImpl) FindAllAccounts(accounts *[]models.Account, storage *storag
 	return true, nil
 }
 
-func (a AccRepoImpl) Create(acc models.AccountDetails, storage *storage.Storage) (bool, error) {
-	db := storage.Get()
+func (a *AccRepoImpl) Create(acc models.AccountDetails) (bool, error) {
+	db := a.s.Get()
 	query := "INSERT INTO accounts (first_name, second_name, email, password) values ($1,$2,$3,$4);"
 	stmt, err := db.Prepare(query)
 	if err != nil {
@@ -58,7 +63,7 @@ func (a AccRepoImpl) Create(acc models.AccountDetails, storage *storage.Storage)
 	fmt.Println(res.RowsAffected())
 	return true, nil
 }
-func (a AccRepoImpl) Update(account *models.Account, storage *storage.Storage) (bool, error) {
+func (a *AccRepoImpl) Update(account *models.Account) (bool, error) {
 	db := a.s.Get()
 	query := "UPDATE accounts SET first_name = $2, second_name = $3, password = $4 WHERE account_id = $1;"
 	stmt, _ := db.Prepare(query)

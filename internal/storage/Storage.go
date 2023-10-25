@@ -11,15 +11,13 @@ type Storage struct {
 }
 
 func New() (*Storage, error) {
-	const op = "storage.postgres.NewStorage" // Имя текущей функции для логов и ошибок
+	const op = "storage.postgres.NewStorage"
 
 	db, err := sql.Open("postgres",
-		"user=postgres password=123 host=localhost dbname=bankdb sslmode=disable") // Подключаемся к БД
+		"user=postgres password=123 host=localhost dbname=bankdb sslmode=disable")
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
-
-	// Создаем таблицу, если ее еще нет
 
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
