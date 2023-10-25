@@ -5,7 +5,6 @@ import (
 	"BankApi/internal/repository"
 	"BankApi/internal/storage"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -32,12 +31,20 @@ func (receiver *AccountHandler) Registration(w http.ResponseWriter, r *http.Requ
 	json.Unmarshal(body, &accountDetails)
 	_, err = receiver.repo.Create(accountDetails)
 	if err != nil {
-		return
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode("Account already exists")
+
+		log.Println(err)
+	} else {
+
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode("Created")
+
 	}
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode("Created")
 }
+
 func (receiver *AccountHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
@@ -49,7 +56,7 @@ func (receiver *AccountHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var accountDetails *models.AccountDetails
 
 	json.Unmarshal(body, &accountDetails)
-	fmt.Println(accountDetails.Login)
+
 	acc, err := receiver.repo.FindAccountByLogin(accountDetails.Login)
 
 	if acc.Password == accountDetails.Password {
@@ -85,7 +92,7 @@ func (receiver *AccountHandler) findAllAccounts(w http.ResponseWriter, r *http.R
 		log.Fatalln(err)
 	}
 	var accounts []models.Account
-	//json.Unmarshal(body, &accountDetails)
+
 	_, err = receiver.repo.FindAllAccounts(&accounts)
 	if err != nil {
 		return
@@ -117,6 +124,7 @@ func (receiver *AccountHandler) findAccount(w http.ResponseWriter, r *http.Reque
 	if err != nil {
 		return
 	}
+
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(marshal)

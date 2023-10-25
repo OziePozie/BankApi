@@ -75,11 +75,11 @@ func (a *AccRepoImpl) Create(acc models.AccountDetails) (bool, error) {
 	query := "INSERT INTO accounts (first_name, second_name, email, password) values ($1,$2,$3,$4);"
 	stmt, err := db.Prepare(query)
 	if err != nil {
-		return false, sql.ErrNoRows
+		return false, err
 	}
 	res, err := stmt.Exec(acc.FirstName, acc.SecondName, acc.Login, acc.Password)
 	if err != nil {
-		return false, sql.ErrNoRows
+		return false, err
 	}
 	defer stmt.Close()
 
