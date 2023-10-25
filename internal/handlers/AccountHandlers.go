@@ -22,74 +22,87 @@ type AccountHandler struct {
 //}
 
 func (receiver *AccountHandler) Registration(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	body, err := io.ReadAll(r.Body)
+	if r.Method == "POST" {
+		defer r.Body.Close()
+		body, err := io.ReadAll(r.Body)
 
-	if err != nil {
-		log.Fatalln(err)
-	}
-	var accountDetails models.AccountDetails
-	json.Unmarshal(body, &accountDetails)
-	_, err = receiver.repo.Create(accountDetails)
-	if err != nil {
-		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		var accountDetails models.AccountDetails
+		json.Unmarshal(body, &accountDetails)
+		_, err = receiver.repo.Create(accountDetails)
+		if err != nil {
+			w.Header().Add("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
 
-		json.NewEncoder(w).Encode("Account already exists")
+			json.NewEncoder(w).Encode("Account already exists")
 
-		log.Println(err)
+			log.Println(err)
+		} else {
+
+			w.Header().Add("Content-Type", "application/json")
+			w.WriteHeader(http.StatusCreated)
+			json.NewEncoder(w).Encode("Created")
+
+		}
 	} else {
-
-		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode("Created")
+		w.WriteHeader(http.StatusMethodNotAllowed)
 
 	}
 }
 
 func (receiver *AccountHandler) Login(w http.ResponseWriter, r *http.Request) {
 
-	defer r.Body.Close()
-	body, err := io.ReadAll(r.Body)
+	if r.Method == "POST" {
+		defer r.Body.Close()
+		body, err := io.ReadAll(r.Body)
 
-	if err != nil {
-		log.Fatalln(err)
-	}
-	var accountDetails *models.AccountDetails
+		if err != nil {
+			log.Fatalln(err)
+		}
+		var accountDetails *models.AccountDetails
 
-	json.Unmarshal(body, &accountDetails)
+		json.Unmarshal(body, &accountDetails)
 
-	acc, err := receiver.repo.FindAccountByLogin(accountDetails.Login)
+		acc, err := receiver.repo.FindAccountByLogin(accountDetails.Login)
 
-	if acc.Password == accountDetails.Password {
+		if acc.Password == accountDetails.Password {
 
-		http.SetCookie(w, &http.Cookie{
-			Name:  "login",
-			Value: acc.Login,
-		})
-		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode("Successful login")
+			http.SetCookie(w, &http.Cookie{
+				Name:  "login",
+				Value: acc.Login,
+			})
+			w.Header().Add("Content-Type", "application/json")
+			w.WriteHeader(http.StatusCreated)
+			json.NewEncoder(w).Encode("Successful login")
 
+		} else {
+			w.Header().Add("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			json.NewEncoder(w).Encode("Unsuccessful login")
+		}
+
+		if err != nil {
+			return
+		}
 	} else {
-		w.Header().Add("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode("Unsuccessful login")
-	}
-
-	if err != nil {
-		return
+		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
 
 }
 
 func (receiver *AccountHandler) Accounts(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Query().Has("id") {
-		receiver.findAccount(w, r)
-	} else if cookie, _ := r.Cookie("login"); cookie != nil {
-		receiver.findAccountByCookie(w, r)
+	if r.Method == "GET" {
+		if r.URL.Query().Has("id") {
+			receiver.findAccount(w, r)
+		} else if cookie, _ := r.Cookie("login"); cookie != nil {
+			receiver.findAccountByCookie(w, r)
+		} else {
+			receiver.findAllAccounts(w, r)
+		}
 	} else {
-		receiver.findAllAccounts(w, r)
+		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
 }
 
