@@ -41,17 +41,60 @@ func (a *AccRepoImpl) FindAccountByLogin(login string) (*models.Account, error) 
 		var id int
 		rows.Scan(&id)
 		billId = append(billId, id)
-	}
 
+	}
 	for _, id := range billId {
 		rows, _ = db.Query(`SELECT bill_id,number,sum_limit FROM bills WHERE bill_id = $1`, id)
-		for rows.Next() {
-			var bill models.Bill
-			rows.Scan(&bill.ID, &bill.Number, &bill.Limit)
-			acc.Bill = append(acc.Bill, bill)
-		}
-
+		go func() {
+			for rows.Next() {
+				var bill models.Bill
+				rows.Scan(&bill.ID, &bill.Number, &bill.Limit)
+				acc.Bill = append(acc.Bill, bill)
+			}
+		}()
 	}
+
+	//c := make(chan int)
+	//var wg sync.WaitGroup
+	//
+	//wg.Add(2)
+	//
+	//go func() {
+	//	for rows.Next() {
+	//		var id int
+	//		rows.Scan(&id)
+	//		billId = append(billId, id)
+	//		c <- id
+	//		fmt.Println(id)
+	//	}
+	//	if !rows.Next() {
+	//		wg.Done()
+	//	}
+	//}()
+	//fmt.Println(c)
+	//go func() {
+	//	r := <-c
+	//	rows, _ = db.Query(`SELECT bill_id,number,sum_limit FROM bills WHERE bill_id = $1`, r)
+	//	for rows.Next() {
+	//		var bill models.Bill
+	//		rows.Scan(&bill.ID, &bill.Number, &bill.Limit)
+	//		acc.Bill = append(acc.Bill, bill)
+	//	}
+	//	if !rows.Next() {
+	//		wg.Done()
+	//	}
+	//
+	//}()
+	//wg.Wait()
+	//for _, id := range billId {
+	//	rows, _ = db.Query(`SELECT bill_id,number,sum_limit FROM bills WHERE bill_id = $1`, id)
+	//	for rows.Next() {
+	//		var bill models.Bill
+	//		rows.Scan(&bill.ID, &bill.Number, &bill.Limit)
+	//		acc.Bill = append(acc.Bill, bill)
+	//	}
+	//
+	//}
 
 	fmt.Println(billId)
 
