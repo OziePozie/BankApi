@@ -19,10 +19,10 @@ type AccRepoImpl struct {
 	AccountRepo
 }
 
-func New(storage *storage.Storage) *AccRepoImpl {
-
-	return &AccRepoImpl{s: storage}
-}
+//func New(storage *storage.Storage) *AccRepoImpl {
+//
+//	return &AccRepoImpl{s: storage}
+//}
 
 func (a *AccRepoImpl) FindAccountByLogin(login string) (*models.Account, error) {
 	var acc models.Account
