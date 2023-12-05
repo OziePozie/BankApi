@@ -2,6 +2,7 @@ package service
 
 import (
 	"BankApi/internal/domain"
+	"context"
 	"errors"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
@@ -21,7 +22,7 @@ type CreateUserCommand struct {
 	Password []byte
 }
 
-func (useCase *CreateUserUseCase) Register(command CreateUserCommand) (string, error) {
+func (useCase *CreateUserUseCase) Register(ctx context.Context, command CreateUserCommand) (string, error) {
 	hash, err := bcrypt.GenerateFromPassword(command.Password, bcrypt.DefaultCost)
 	if err != nil {
 		return "", err
@@ -29,7 +30,7 @@ func (useCase *CreateUserUseCase) Register(command CreateUserCommand) (string, e
 
 	user := domain.NewUser(command.Username, hash)
 
-	err = useCase.userRepository.Save(user)
+	err = useCase.userRepository.Save(ctx, user)
 	if err != nil {
 		return "", fmt.Errorf("save user: %w", err)
 	}
@@ -43,8 +44,8 @@ func (useCase *CreateUserUseCase) createToken(user *domain.User) (string, error)
 
 var ErrUnauthorized = errors.New("user is not authorized")
 
-func (useCase *CreateUserUseCase) Login(command CreateUserCommand) (*domain.User, error) {
-	user, err := useCase.userRepository.FindByName(command.Username)
+func (useCase *CreateUserUseCase) Login(ctx context.Context, command CreateUserCommand) (*domain.User, error) {
+	user, err := useCase.userRepository.FindByName(ctx, command.Username)
 	if err != nil {
 		return nil, fmt.Errorf("find by username: %w", err)
 	}

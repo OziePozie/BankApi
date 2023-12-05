@@ -2,6 +2,7 @@ package di
 
 import (
 	"BankApi/internal/service"
+	"context"
 	"os"
 )
 
@@ -14,6 +15,10 @@ type ServiceContainer struct {
 	createUser *service.CreateUserUseCase
 }
 
+func NewServiceContainer(repo *RepoContainer) *ServiceContainer {
+	return &ServiceContainer{repo: repo}
+}
+
 func (s *ServiceContainer) SecretKey() string {
 	if s.secretKey == "" {
 		s.secretKey = os.Getenv("JWT_SECRET_KEY")
@@ -22,10 +27,10 @@ func (s *ServiceContainer) SecretKey() string {
 	return s.secretKey
 }
 
-func (s *ServiceContainer) CreateBill() *service.CreateBillUseCase {
+func (s *ServiceContainer) CreateBill(ctx context.Context) *service.CreateBillUseCase {
 
 	if s.createBill == nil {
-		s.createBill = service.NewCreateBillUseCase(s.repo.billRepository)
+		s.createBill = service.NewCreateBillUseCase(s.repo.BillRepository(ctx))
 	}
 	return s.createBill
 }
@@ -34,10 +39,10 @@ func (s *ServiceContainer) SetCreateBill(createBill *service.CreateBillUseCase) 
 	s.createBill = createBill
 }
 
-func (s *ServiceContainer) CreateUser() *service.CreateUserUseCase {
+func (s *ServiceContainer) CreateUser(ctx context.Context) *service.CreateUserUseCase {
 
 	if s.createUser == nil {
-		s.createUser = service.NewCreateUserUseCase(s.repo.userRepository, s.secretKey)
+		s.createUser = service.NewCreateUserUseCase(s.repo.UserRepository(ctx), s.secretKey)
 	}
 
 	return s.createUser
@@ -45,8 +50,4 @@ func (s *ServiceContainer) CreateUser() *service.CreateUserUseCase {
 
 func (s *ServiceContainer) SetCreateUser(createUser *service.CreateUserUseCase) {
 	s.createUser = createUser
-}
-
-func NewServiceContainer() *ServiceContainer {
-	return &ServiceContainer{}
 }

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"BankApi/internal/service"
+	"encoding/json"
 	"net/http"
 )
 
@@ -22,7 +23,28 @@ type POSTRegisterResponse struct {
 	Token string `json:"token"`
 }
 
-func (P POSTRegisterHandler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
-	//TODO implement me
-	panic("implement me")
+func (p *POSTRegisterHandler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	var r POSTRegisterRequest
+	if err := json.NewDecoder(request.Body).Decode(&r); err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
+
+		return
+	}
+
+	token, err := p.useCase.Register(
+		request.Context(),
+		service.CreateUserCommand{
+			Username: r.Username,
+			Password: []byte(r.Password),
+		},
+	)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+
+		return
+	}
+
+	writer.WriteHeader(http.StatusNoContent)
+	writer.Header().Set("Authorization", token)
+
 }
