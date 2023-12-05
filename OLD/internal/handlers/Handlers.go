@@ -12,10 +12,12 @@ func New() *Handlers {
 	repos := repository.New()
 	return &Handlers{
 		AccHandler: &AccountHandler{
-			repo: repos.AccRepos},
+			repo: repos.AccRepos,
+		},
 		BillHandler: &BillHandler{
 			repo:    repos.BillsRepos,
-			accRepo: repos.AccRepos},
+			accRepo: repos.AccRepos,
+		},
 		CardHandler: &CardHandler{
 			cardRepo: repos.CardRepos,
 			accRepo:  repos.AccRepos,
