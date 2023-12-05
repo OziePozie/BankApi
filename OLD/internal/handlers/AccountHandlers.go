@@ -16,41 +16,19 @@ type AccountHandler struct {
 }
 
 //func New() *AccountHandler {
-//	repo := repository.New(storage)
+//	repo := repository.New(storage)!№№@
 //
 //	return &AccountHandler{repo: repo.AccRepos}
 //}
 
-func (receiver *AccountHandler) Registration(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" {
-		defer r.Body.Close()
-		body, err := io.ReadAll(r.Body)
-
-		if err != nil {
-			log.Fatalln(err)
-		}
-		var accountDetails models.AccountDetails
-		json.Unmarshal(body, &accountDetails)
-		_, err = receiver.repo.Create(accountDetails)
-		if err != nil {
-			w.Header().Add("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-
-			json.NewEncoder(w).Encode("Account already exists")
-
-			log.Println(err)
-		} else {
-
-			w.Header().Add("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
-			json.NewEncoder(w).Encode("Created")
-
-		}
-	} else {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-
-	}
-}
+//func (receiver *AccountHandler) Registration(w http.ResponseWriter, r *http.Request) {
+//	if r.Method == "POST" {
+//
+//	} else {
+//		w.WriteHeader(http.StatusMethodNotAllowed)
+//
+//	}
+//}
 
 func (receiver *AccountHandler) Login(w http.ResponseWriter, r *http.Request) {
 
@@ -93,6 +71,7 @@ func (receiver *AccountHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (receiver *AccountHandler) Accounts(w http.ResponseWriter, r *http.Request) {
+
 	if r.Method == "GET" {
 		if r.URL.Query().Has("id") {
 			receiver.findAccount(w, r)
@@ -101,6 +80,8 @@ func (receiver *AccountHandler) Accounts(w http.ResponseWriter, r *http.Request)
 		} else {
 			receiver.findAllAccounts(w, r)
 		}
+	} else if r.Method == "POST" {
+		receiver.createAccount(w, r)
 	} else {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
@@ -109,6 +90,7 @@ func (receiver *AccountHandler) Accounts(w http.ResponseWriter, r *http.Request)
 func (receiver *AccountHandler) findAllAccounts(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
+
 	_, err := io.ReadAll(r.Body)
 
 	if err != nil {
@@ -174,4 +156,31 @@ func (receiver *AccountHandler) findAccountByCookie(w http.ResponseWriter, r *ht
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(marshal)
+}
+
+func (receiver *AccountHandler) createAccount(w http.ResponseWriter, r *http.Request) {
+
+	defer r.Body.Close()
+	body, err := io.ReadAll(r.Body)
+
+	if err != nil {
+		log.Fatalln(err)
+	}
+	var accountDetails models.AccountDetails
+	json.Unmarshal(body, &accountDetails)
+	_, err = receiver.repo.Create(accountDetails)
+	if err != nil {
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+
+		json.NewEncoder(w).Encode("Account already exists")
+
+		log.Println(err)
+	} else {
+
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode("Created")
+
+	}
 }

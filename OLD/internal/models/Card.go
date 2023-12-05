@@ -8,6 +8,14 @@ type Card struct {
 	ExpirationDate time.Time `json:"expirationDate"`
 	Balance        float64   `json:"balance"`
 	CurrencyTag    string    `json:"CurrencyTag"`
-	History        []History `json:"history"`
+	History        []int     `json:"history"`
 	IsCardActive   bool      `json:"isCardActive"`
+	Type           CardTypes `json:"cardType"`
 }
+
+type CardTypes string
+
+const (
+	CARD   CardTypes = "debit"
+	CREDIT CardTypes = "credit"
+)

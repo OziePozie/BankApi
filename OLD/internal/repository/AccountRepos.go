@@ -8,71 +8,91 @@ import (
 	"log"
 )
 
-type AccountRepo interface {
-	FindAllAccounts(accounts *[]models.Account, storage2 *storage.Storage) (bool, error)
-	Create(acc models.AccountDetails, storage2 *storage.Storage) (bool, error)
-	Update(account *models.Account, storage2 *storage.Storage) (bool, error)
-}
-
 type AccRepoImpl struct {
 	s *storage.Storage
-	AccountRepo
 }
 
 func (a *AccRepoImpl) FindAccountByLogin(login string) (*models.Account, error) {
 	var acc models.Account
 	db := a.s.Get()
-
-	var billId []int
-
-	query := `SELECT * FROM accounts WHERE email = $1::TEXT;`
+	query := `SELECT accounts.account_id FROM accounts WHERE email = $1::TEXT`
 
 	row := db.QueryRow(query, login)
-	row.Scan(&acc.ID,
-		&acc.FirstName,
-		&acc.SecondName,
-		&acc.Login,
-		&acc.Password,
-	)
+	row.Scan(&acc.ID)
 
-	rows, _ := db.Query(`SELECT bill_id FROM bills WHERE account_id = $1`, acc.ID)
+	query = `SELECT bill_id 
+FROM accounts join public.bills b on 
+    accounts.account_id = b.account_id WHERE b.account_id = $1`
+
+	rows, _ := db.Query(query, acc.ID)
+
+	var bills []int
 
 	for rows.Next() {
-		var id int
-		rows.Scan(&id)
-		billId = append(billId, id)
-
+		var res int
+		rows.Scan(&res)
+		bills = append(bills, res)
 	}
-	for _, id := range billId {
-		rows, _ = db.Query(`SELECT bill_id,number,sum_limit FROM bills WHERE bill_id = $1`, id)
-		go func() {
-			for rows.Next() {
-				var bill models.Bill
-				rows.Scan(&bill.ID, &bill.Number, &bill.Limit)
-				acc.Bill = append(acc.Bill, bill)
-			}
-		}()
-	}
+	acc.Bill = bills
 
-	//c := make(chan int)
+	//billIdChan := make(chan int)
+	//done := make(chan bool)
 	//var wg sync.WaitGroup
-	//
-	//wg.Add(2)
-	//
 	//go func() {
+	//	rows, _ := db.Query(`SELECT bill_id FROM bills WHERE account_id = $1`, acc.ID)
 	//	for rows.Next() {
 	//		var id int
 	//		rows.Scan(&id)
-	//		billId = append(billId, id)
-	//		c <- id
-	//		fmt.Println(id)
+	//		billIdChan <- id
 	//	}
-	//	if !rows.Next() {
-	//		wg.Done()
-	//	}
+	//	close(billIdChan)
 	//}()
-	//fmt.Println(c)
+	//
+	//for id := range billIdChan {
+	//	wg.Add(1)
+	//	go func(id int) {
+	//		defer wg.Done()
+	//		fmt.Println(id)
+	//		rows, _ := db.Query(`SELECT bill_id,number,sum_limit FROM bills WHERE bill_id = $1`, id)
+	//		for rows.Next() {
+	//			var bill models.Bill
+	//			rows.Scan(&bill.ID, &bill.Number, &bill.Limit)
+	//			acc.Bill = append(acc.Bill, bill)
+	//		}
+	//		done <- true
+	//	}(id)
+	//}
 	//go func() {
+	//	wg.Wait()   // Ожидаем завершения всех горутин
+	//	close(done) // Закрываем канал для сигнализации о завершении
+	//}()
+	//for range done {
+	//	<-done
+	//}
+
+	//var billId []int
+	//
+	//rows, _ := db.Query(`SELECT bill_id FROM bills WHERE account_id = $1`, acc.ID)
+	//
+	//for rows.Next() {
+	//	var id int
+	//	rows.Scan(&id)
+	//	billId = append(billId, id)
+	//
+	//}
+	//for _, id := range billId {
+	//	rows, _ = db.Query(`SELECT bill_id,number,sum_limit FROM bills WHERE bill_id = $1`, id)
+	//	go func() {
+	//		for rows.Next() {
+	//			var bill models.Bill
+	//			rows.Scan(&bill.ID, &bill.Number, &bill.Limit)
+	//			acc.Bill = append(acc.Bill, bill)
+	//		}
+	//	}()
+	//}
+
+	//c := make(chan int)
+	//go func(chan int) {
 	//	r := <-c
 	//	rows, _ = db.Query(`SELECT bill_id,number,sum_limit FROM bills WHERE bill_id = $1`, r)
 	//	for rows.Next() {
@@ -80,23 +100,17 @@ func (a *AccRepoImpl) FindAccountByLogin(login string) (*models.Account, error) 
 	//		rows.Scan(&bill.ID, &bill.Number, &bill.Limit)
 	//		acc.Bill = append(acc.Bill, bill)
 	//	}
-	//	if !rows.Next() {
-	//		wg.Done()
-	//	}
 	//
-	//}()
-	//wg.Wait()
-	//for _, id := range billId {
-	//	rows, _ = db.Query(`SELECT bill_id,number,sum_limit FROM bills WHERE bill_id = $1`, id)
-	//	for rows.Next() {
-	//		var bill models.Bill
-	//		rows.Scan(&bill.ID, &bill.Number, &bill.Limit)
-	//		acc.Bill = append(acc.Bill, bill)
-	//	}
+	//}(c)
+	//
+	//for rows.Next() {
+	//	var id int
+	//	rows.Scan(&id)
+	//	billId = append(billId, id)
+	//	c <- id
 	//
 	//}
-
-	fmt.Println(billId)
+	//close(c)
 
 	fmt.Println(acc)
 
@@ -161,17 +175,28 @@ func (a *AccRepoImpl) FindAccountById(id int) (*models.Account, error) {
 
 	query := `SELECT * FROM accounts WHERE account_id = $1;`
 
-	rows := db.QueryRow(query, id)
+	row := db.QueryRow(query, id)
 
-	//if err != nil {
-	//	return nil, err
-	//}
-
-	rows.Scan(&acc.ID,
+	row.Scan(&acc.ID,
 		&acc.FirstName,
 		&acc.SecondName,
 		&acc.Login,
 		&acc.Password)
+
+	query = `SELECT bill_id 
+FROM accounts join public.bills b on 
+    accounts.account_id = b.account_id WHERE b.account_id = $1`
+
+	rows, _ := db.Query(query, acc.ID)
+
+	var bills []int
+
+	for rows.Next() {
+		var res int
+		rows.Scan(&res)
+		bills = append(bills, res)
+	}
+	acc.Bill = bills
 
 	fmt.Println(acc)
 

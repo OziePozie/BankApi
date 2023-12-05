@@ -24,13 +24,12 @@ func (route *Route) New() Route {
 func (route *Route) Init(serverAddr string) {
 	fmt.Println(route.accHandler)
 	mux := http.NewServeMux()
-	mux.HandleFunc("/register", route.accHandler.Registration)
 	mux.HandleFunc("/login", route.accHandler.Login)
 	mux.HandleFunc("/accounts", route.accHandler.Accounts)
 	mux.HandleFunc("/bills", route.billHandler.Bills)
-	mux.HandleFunc("/bills/create-bill", route.billHandler.CreateBill)
-	mux.HandleFunc("/bills/set-limit", route.billHandler.SetLimit)
-	mux.HandleFunc("/cards/create-card", route.cardHandler.CreateCard)
+	//mux.HandleFunc("/bills", route.billHandler.CreateBill)
+	//mux.HandleFunc("/bills/set-limit", route.billHandler.SetLimit)
+	mux.HandleFunc("/cards", route.cardHandler.CreateCard)
 	http.ListenAndServe(serverAddr, mux)
 
 }

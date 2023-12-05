@@ -6,7 +6,7 @@ type Account struct {
 	SecondName string `json:"second_name"`
 	Login      string `json:"login"`
 	Password   string `json:"password"`
-	Bill       []Bill `json:"bills"`
+	Bill       []int  `json:"bills_id"`
 }
 
 type AccountDetails struct {
