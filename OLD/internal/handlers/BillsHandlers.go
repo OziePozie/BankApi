@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"BankApi/internal/models"
-	"BankApi/internal/repository"
+	"BankApi/OLD/internal/models"
+	repository2 "BankApi/OLD/internal/repository"
 	"encoding/json"
 	"io"
 	"log"
@@ -10,8 +10,8 @@ import (
 )
 
 type BillHandler struct {
-	repo    *repository.BillRepoImpl
-	accRepo *repository.AccRepoImpl
+	repo    *repository2.BillRepoImpl
+	accRepo *repository2.AccRepoImpl
 }
 
 func (h *BillHandler) Bills(w http.ResponseWriter, r *http.Request) {

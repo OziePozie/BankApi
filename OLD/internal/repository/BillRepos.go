@@ -1,8 +1,8 @@
 package repository
 
 import (
-	m "BankApi/internal/models"
-	"BankApi/internal/storage"
+	m "BankApi/OLD/internal/models"
+	"BankApi/OLD/internal/storage"
 	"fmt"
 	"math/rand"
 	"strconv"

@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"BankApi/internal/models"
-	"BankApi/internal/storage"
+	"BankApi/OLD/internal/models"
+	"BankApi/OLD/internal/storage"
 	"database/sql"
 	"fmt"
 	"log"

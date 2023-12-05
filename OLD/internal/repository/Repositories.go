@@ -1,6 +1,8 @@
 package repository
 
-import "BankApi/internal/storage"
+import (
+	"BankApi/OLD/internal/storage"
+)
 
 type Repositories struct {
 	AccRepos   *AccRepoImpl

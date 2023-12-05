@@ -1,15 +1,15 @@
 package handlers
 
 import (
-	"BankApi/internal/repository"
+	repository2 "BankApi/OLD/internal/repository"
 	"net/http"
 	"strconv"
 )
 
 type CardHandler struct {
-	cardRepo *repository.CardRepoImpl
-	accRepo  *repository.AccRepoImpl
-	billRepo *repository.BillRepoImpl
+	cardRepo *repository2.CardRepoImpl
+	accRepo  *repository2.AccRepoImpl
+	billRepo *repository2.BillRepoImpl
 }
 
 func (c *CardHandler) CreateCard(w http.ResponseWriter, r *http.Request) {
