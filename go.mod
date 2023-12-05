@@ -14,4 +14,7 @@ require (
 	golang.org/x/text v0.14.0 // indirect
 )
 
-require github.com/gofrs/uuid v4.4.0+incompatible // indirect
+require (
+	github.com/gofrs/uuid v4.4.0+incompatible // indirect
+	github.com/gorilla/mux v1.8.1 // indirect
+)

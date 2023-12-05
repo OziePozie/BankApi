@@ -22,7 +22,7 @@ func (s *ServiceContainer) SecretKey() string {
 	return s.secretKey
 }
 
-func (s *ServiceContainer) Bill() *service.CreateBillUseCase {
+func (s *ServiceContainer) CreateBill() *service.CreateBillUseCase {
 
 	if s.createBill == nil {
 		s.createBill = service.NewCreateBillUseCase(s.repo.billRepository)
@@ -37,7 +37,7 @@ func (s *ServiceContainer) SetCreateBill(createBill *service.CreateBillUseCase) 
 func (s *ServiceContainer) CreateUser() *service.CreateUserUseCase {
 
 	if s.createUser == nil {
-		s.createUser = service.NewCreateUserUseCase(s.repo.userRepository)
+		s.createUser = service.NewCreateUserUseCase(s.repo.userRepository, s.secretKey)
 	}
 
 	return s.createUser

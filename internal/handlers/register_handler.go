@@ -1,6 +1,9 @@
 package handlers
 
-import "BankApi/internal/service"
+import (
+	"BankApi/internal/service"
+	"net/http"
+)
 
 type POSTRegisterHandler struct {
 	useCase *service.CreateUserUseCase
@@ -17,4 +20,9 @@ type POSTRegisterRequest struct {
 
 type POSTRegisterResponse struct {
 	Token string `json:"token"`
+}
+
+func (P POSTRegisterHandler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+	//TODO implement me
+	panic("implement me")
 }
