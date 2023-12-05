@@ -1,6 +1,9 @@
 package domain
 
-import "github.com/gofrs/uuid"
+import (
+	"context"
+	"github.com/gofrs/uuid"
+)
 
 type User struct {
 	id           uuid.UUID
@@ -25,6 +28,6 @@ func NewUser(name string, hash []byte) *User {
 }
 
 type UserRepository interface {
-	Save(user *User) error
-	FindByName(name string) (*User, error)
+	Save(ctx context.Context, user *User) error
+	FindByName(ctx context.Context, name string) (*User, error)
 }

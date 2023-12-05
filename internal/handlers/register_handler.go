@@ -14,3 +14,7 @@ type POSTRegisterRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
+
+type POSTRegisterResponse struct {
+	Token string `json:"token"`
+}

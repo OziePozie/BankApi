@@ -12,8 +12,10 @@ type Repository struct {
 	pool *pgxpool.Pool
 }
 
-func NewUserRepository() *Repository {
-	return &Repository{}
+func NewUserRepository(pool *pgxpool.Pool) *Repository {
+	return &Repository{
+		pool: pool,
+	}
 }
 
 func (r *Repository) Save(ctx context.Context, user *domain.User) error {
