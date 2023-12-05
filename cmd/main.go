@@ -1,7 +1,7 @@
 package main
 
 import (
-	"BankApi/internal/routes"
+	"BankApi/OLD/internal/routes"
 )
 
 func main() {

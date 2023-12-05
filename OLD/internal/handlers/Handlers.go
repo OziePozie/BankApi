@@ -1,6 +1,8 @@
 package handlers
 
-import "BankApi/internal/repository"
+import (
+	"BankApi/OLD/internal/repository"
+)
 
 type Handlers struct {
 	AccHandler  *AccountHandler

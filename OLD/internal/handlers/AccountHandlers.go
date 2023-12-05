@@ -1,9 +1,8 @@
 package handlers
 
 import (
-	"BankApi/internal/models"
-	"BankApi/internal/repository"
-
+	"BankApi/OLD/internal/models"
+	"BankApi/OLD/internal/repository"
 	"encoding/json"
 	"io"
 	"log"

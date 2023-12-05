@@ -1,19 +1,19 @@
 package routes
 
 import (
-	"BankApi/internal/handlers"
+	handlers2 "BankApi/OLD/internal/handlers"
 	"fmt"
 	"net/http"
 )
 
 type Route struct {
-	accHandler  *handlers.AccountHandler
-	billHandler *handlers.BillHandler
-	cardHandler *handlers.CardHandler
+	accHandler  *handlers2.AccountHandler
+	billHandler *handlers2.BillHandler
+	cardHandler *handlers2.CardHandler
 }
 
 func (route *Route) New() Route {
-	handler := handlers.New()
+	handler := handlers2.New()
 	return Route{
 		accHandler:  handler.AccHandler,
 		billHandler: handler.BillHandler,

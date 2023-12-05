@@ -1,21 +1,22 @@
-package postgres
+package user
 
 import (
 	"BankApi/internal/domain"
+	"BankApi/internal/repository"
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type UserRepository struct {
+type Repository struct {
 	pool *pgxpool.Pool
 }
 
-func NewUserRepository() *UserRepository {
-	return &UserRepository{}
+func NewUserRepository() *Repository {
+	return &Repository{}
 }
 
-func (r *UserRepository) Save(ctx context.Context, user *domain.User) error {
+func (r *Repository) Save(ctx context.Context, user *domain.User) error {
 
 	_, err := r.pool.Exec(ctx, "INSERT INTO accounts (first_name, email, password) values ($1,$2,$3);",
 		user.Name(), user.Email(), user.PasswordHash())
@@ -28,7 +29,7 @@ func (r *UserRepository) Save(ctx context.Context, user *domain.User) error {
 
 }
 
-func (r *UserRepository) FindByName(ctx context.Context, name string) (*domain.User, error) {
+func (r *Repository) FindByName(ctx context.Context, name string) (*domain.User, error) {
 	r.pool.Exec(ctx, "SELECT ")
-	return nil, errNotImplemented
+	return nil, repository.ErrNotImplement
 }
