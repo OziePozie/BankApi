@@ -46,7 +46,7 @@ func (p *POSTRegisterHandler) ServeHTTP(writer http.ResponseWriter, request *htt
 		return
 	}
 
-	writer.WriteHeader(http.StatusNoContent)
+	writer.WriteHeader(http.StatusOK)
 	writer.Header().Set("Authorization", token)
 
 }

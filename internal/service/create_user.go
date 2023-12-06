@@ -42,12 +42,11 @@ func (useCase *CreateUserUseCase) Register(ctx context.Context, command CreateUs
 }
 
 func (useCase *CreateUserUseCase) createToken(user *domain.User) (string, error) {
-	token := jwt.New(jwt.SigningMethodEdDSA)
+	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	claims["exp"] = time.Now().Add(10 * time.Minute)
-	claims["authorized"] = true
 	claims["user"] = user.Name()
-	tokenString, err := token.SignedString(useCase.secretKey)
+	tokenString, err := token.SignedString([]byte(useCase.secretKey))
 	if err != nil {
 		return "", err
 	}
