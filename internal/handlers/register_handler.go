@@ -16,11 +16,12 @@ func NewPOSTRegisterHandler(useCase *service.CreateUserUseCase) *POSTRegisterHan
 
 type POSTRegisterRequest struct {
 	Username string `json:"username"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
 type POSTRegisterResponse struct {
-	Token string `json:"token"`
+	Token []byte `json:"token"`
 }
 
 func (p *POSTRegisterHandler) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
@@ -35,6 +36,7 @@ func (p *POSTRegisterHandler) ServeHTTP(writer http.ResponseWriter, request *htt
 		request.Context(),
 		service.CreateUserCommand{
 			Username: r.Username,
+			Email:    r.Email,
 			Password: []byte(r.Password),
 		},
 	)

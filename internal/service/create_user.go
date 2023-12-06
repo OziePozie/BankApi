@@ -21,6 +21,7 @@ func NewCreateUserUseCase(userRepository domain.UserRepository, secretKey string
 
 type CreateUserCommand struct {
 	Username string
+	Email    string
 	Password []byte
 }
 
