@@ -22,7 +22,6 @@ func (r *Repository) Save(ctx context.Context, user *domain.User) error {
 
 	_, err := r.pool.Exec(ctx, "INSERT INTO accounts (first_name, email, password) values ($1,$2,$3);",
 		user.Name(), user.Email(), user.PasswordHash())
-	defer r.pool.Close()
 	if err != nil {
 		return fmt.Errorf("insert user: %w", err)
 	}
