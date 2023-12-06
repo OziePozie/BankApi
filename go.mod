@@ -16,5 +16,6 @@ require (
 
 require (
 	github.com/gofrs/uuid v4.4.0+incompatible // indirect
+	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 )

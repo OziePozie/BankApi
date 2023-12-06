@@ -5,7 +5,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
+	"time"
 )
 
 type CreateUserUseCase struct {
@@ -39,7 +41,17 @@ func (useCase *CreateUserUseCase) Register(ctx context.Context, command CreateUs
 }
 
 func (useCase *CreateUserUseCase) createToken(user *domain.User) (string, error) {
-	return "", errors.New("not implemented")
+	token := jwt.New(jwt.SigningMethodEdDSA)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["exp"] = time.Now().Add(10 * time.Minute)
+	claims["authorized"] = true
+	claims["user"] = user.Name()
+	tokenString, err := token.SignedString(useCase.secretKey)
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
 }
 
 var ErrUnauthorized = errors.New("user is not authorized")
