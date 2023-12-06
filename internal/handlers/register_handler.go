@@ -3,6 +3,7 @@ package handlers
 import (
 	"BankApi/internal/service"
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
@@ -32,6 +33,8 @@ func (p *POSTRegisterHandler) ServeHTTP(writer http.ResponseWriter, request *htt
 		return
 	}
 
+	log.Print(r.Email)
+
 	token, err := p.useCase.Register(
 		request.Context(),
 		service.CreateUserCommand{
@@ -45,8 +48,7 @@ func (p *POSTRegisterHandler) ServeHTTP(writer http.ResponseWriter, request *htt
 
 		return
 	}
-
-	writer.WriteHeader(http.StatusOK)
 	writer.Header().Set("Authorization", token)
+	writer.WriteHeader(http.StatusOK)
 
 }

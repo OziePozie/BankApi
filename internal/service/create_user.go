@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 	"time"
 )
 
@@ -31,7 +32,7 @@ func (useCase *CreateUserUseCase) Register(ctx context.Context, command CreateUs
 		return "", err
 	}
 
-	user := domain.NewUser(command.Username, hash)
+	user := domain.NewUser(command.Username, command.Email, hash)
 
 	err = useCase.userRepository.Save(ctx, user)
 	if err != nil {
@@ -50,6 +51,8 @@ func (useCase *CreateUserUseCase) createToken(user *domain.User) (string, error)
 	if err != nil {
 		return "", err
 	}
+
+	log.Print(tokenString)
 
 	return tokenString, nil
 }

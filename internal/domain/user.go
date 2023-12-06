@@ -19,10 +19,11 @@ func (u *User) Email() string {
 	return u.email
 }
 
-func NewUser(name string, hash []byte) *User {
+func NewUser(name string, email string, hash []byte) *User {
 	return &User{
 		id:           uuid.Must(uuid.NewV7()),
 		name:         name,
+		email:        email,
 		passwordHash: hash,
 	}
 }

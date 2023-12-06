@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"log"
 )
 
 type Repository struct {
@@ -19,6 +20,8 @@ func NewUserRepository(pool *pgxpool.Pool) *Repository {
 }
 
 func (r *Repository) Save(ctx context.Context, user *domain.User) error {
+
+	log.Print(user.Email())
 
 	_, err := r.pool.Exec(ctx, "INSERT INTO accounts (first_name, email, password) values ($1,$2,$3);",
 		user.Name(), user.Email(), user.PasswordHash())
