@@ -3,6 +3,7 @@ package handlers
 import (
 	"BankApi/internal/service"
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
@@ -39,6 +40,7 @@ func (p *POSTLoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			Password: []byte(req.Password),
 		},
 	)
+	log.Print(err)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return

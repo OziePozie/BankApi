@@ -4,8 +4,10 @@ import (
 	"BankApi/internal/domain"
 	"BankApi/internal/service/utils"
 	"context"
+	"errors"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
+	"log"
 )
 
 type LoginUserUseCase struct {
@@ -28,10 +30,15 @@ func (useCase *LoginUserUseCase) Login(ctx context.Context, command LoginUserCom
 		return "", fmt.Errorf("find by username: %w", err)
 	}
 
+	log.Print("hash", user.PasswordHash())
+	log.Println("password", command.Password)
+
 	if err := bcrypt.CompareHashAndPassword(user.PasswordHash(), command.Password); err != nil {
-		return "", ErrUnauthorized
+		return "", ErrNotCorrectCredentials
 	}
 
 	return utils.CreateToken(user, useCase.secretKey)
 
 }
+
+var ErrNotCorrectCredentials = errors.New("Not correct credentials")

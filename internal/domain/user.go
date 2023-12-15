@@ -12,6 +12,22 @@ type User struct {
 	passwordHash []byte
 }
 
+func (u *User) SetId(id uuid.UUID) {
+	u.id = id
+}
+
+func (u *User) SetName(name string) {
+	u.name = name
+}
+
+func (u *User) SetEmail(email string) {
+	u.email = email
+}
+
+func (u *User) SetPasswordHash(passwordHash []byte) {
+	u.passwordHash = passwordHash
+}
+
 func (u *User) ID() uuid.UUID        { return u.id }
 func (u *User) Name() string         { return u.name }
 func (u *User) PasswordHash() []byte { return u.passwordHash }
