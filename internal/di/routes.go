@@ -14,6 +14,20 @@ type RouterContainer struct {
 
 	postBill     *handlers.POSTBillsHandler
 	postRegister *handlers.POSTRegisterHandler
+	postLogin    *handlers.POSTLoginHandler
+}
+
+func (c *RouterContainer) PostLogin(ctx context.Context) *handlers.POSTLoginHandler {
+
+	if c.postLogin == nil {
+		c.postLogin = handlers.NewPOSTLoginHandler(c.service.LoginUser(ctx))
+	}
+
+	return c.postLogin
+}
+
+func (c *RouterContainer) SetPostLogin(postLogin *handlers.POSTLoginHandler) {
+	c.postLogin = postLogin
 }
 
 func NewRouterContainer(service *ServiceContainer) *RouterContainer {
@@ -48,7 +62,7 @@ func (c *RouterContainer) HTTPRouter(ctx context.Context) http.Handler {
 
 	router.Handle("/bills", c.PostBill(ctx)).Methods(http.MethodPost)
 	router.Handle("/register", c.PostRegister(ctx)).Methods(http.MethodPost)
-
+	router.Handle("/login", c.PostLogin(ctx)).Methods(http.MethodPost)
 	c.router = router
 
 	return c.router

@@ -2,13 +2,11 @@ package service
 
 import (
 	"BankApi/internal/domain"
+	"BankApi/internal/service/utils"
 	"context"
 	"errors"
 	"fmt"
-	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
-	"log"
-	"time"
 )
 
 type CreateUserUseCase struct {
@@ -39,35 +37,23 @@ func (useCase *CreateUserUseCase) Register(ctx context.Context, command CreateUs
 		return "", fmt.Errorf("save user: %w", err)
 	}
 
-	return useCase.createToken(user)
+	return utils.CreateToken(user, useCase.secretKey)
 }
 
-func (useCase *CreateUserUseCase) createToken(user *domain.User) (string, error) {
-	token := jwt.New(jwt.SigningMethodHS256)
-	claims := token.Claims.(jwt.MapClaims)
-	claims["exp"] = time.Now().Add(10 * time.Minute)
-	claims["user"] = user.Name()
-	tokenString, err := token.SignedString([]byte(useCase.secretKey))
-	if err != nil {
-		return "", err
-	}
-
-	log.Print(tokenString)
-
-	return tokenString, nil
-}
+//
+//func (useCase *CreateUserUseCase) createToken(user *domain.User) (string, error) {
+//	token := jwt.New(jwt.SigningMethodHS256)
+//	claims := token.Claims.(jwt.MapClaims)
+//	claims["exp"] = time.Now().Add(10 * time.Minute)
+//	claims["user"] = user.Name()
+//	tokenString, err := token.SignedString([]byte(useCase.secretKey))
+//	if err != nil {
+//		return "", err
+//	}
+//
+//	log.Print(tokenString)
+//
+//	return tokenString, nil
+//}
 
 var ErrUnauthorized = errors.New("user is not authorized")
-
-func (useCase *CreateUserUseCase) Login(ctx context.Context, command CreateUserCommand) (*domain.User, error) {
-	user, err := useCase.userRepository.FindByName(ctx, command.Username)
-	if err != nil {
-		return nil, fmt.Errorf("find by username: %w", err)
-	}
-
-	if err := bcrypt.CompareHashAndPassword(user.PasswordHash(), command.Password); err != nil {
-		return nil, ErrUnauthorized
-	}
-
-	return user, nil
-}
