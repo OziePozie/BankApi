@@ -10,6 +10,7 @@ CREATE table IF NOT EXISTS bills (
                                      bill_id SERIAL,
                                      bill_uuid uuid primary key,
                                      account_uuid uuid references accounts (acc_uuid),
+                                     name varchar,
     number bigint,
     sum_limit int
     );
@@ -44,3 +45,5 @@ INSERT INTO currency VALUES (1, 'RU', 100);
 INSERT INTO currency VALUES (2, 'EU', 0.95);
 
 INSERT INTO currency VALUES (3, 'USD', 1);
+
+ALTER TABLE bills ADD name varchar;

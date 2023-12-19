@@ -16,6 +16,7 @@ type RouterContainer struct {
 	postBill     *handlers.POSTBillsHandler
 	postRegister *handlers.POSTRegisterHandler
 	postLogin    *handlers.POSTLoginHandler
+	getBill      *handlers.GETBillsHandler
 }
 
 func (c *RouterContainer) PostLogin(ctx context.Context) *handlers.POSTLoginHandler {
@@ -68,9 +69,21 @@ func (c *RouterContainer) HTTPRouter(ctx context.Context) http.Handler {
 
 	//router.Handle("/bills", c.PostBill(ctx)).Methods(http.MethodPost)
 	billRouter.Handle("/bills", c.PostBill(ctx)).Methods(http.MethodPost)
+	billRouter.Handle("/bills", c.GetBill(ctx)).Methods(http.MethodGet)
+
 	router.Handle("/register", c.PostRegister(ctx)).Methods(http.MethodPost)
 	router.Handle("/login", c.PostLogin(ctx)).Methods(http.MethodPost)
 	c.router = router
 
 	return c.router
+}
+
+func (c *RouterContainer) GetBill(ctx context.Context) http.Handler {
+	if c.getBill == nil {
+		c.getBill = handlers.NewGETBillsHandler(c.service.GetBill(ctx))
+
+	}
+
+	return c.getBill
+
 }

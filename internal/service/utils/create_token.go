@@ -16,7 +16,7 @@ type CreateTokenUseCase struct {
 func CreateToken(user *domain.User, secretKey string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	claims["exp"] = jwt.NewNumericDate(time.Now().Add(10 * time.Minute))
+	claims["exp"] = jwt.NewNumericDate(time.Now().Add(10 * time.Hour))
 	claims["user"] = user.ID()
 	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {

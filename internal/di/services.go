@@ -13,7 +13,17 @@ type ServiceContainer struct {
 
 	createBill *service.CreateBillUseCase
 	createUser *service.CreateUserUseCase
+	getBill    *service.GetBillUseCase
 	loginUser  *service.LoginUserUseCase
+}
+
+func (s *ServiceContainer) GetBill(ctx context.Context) *service.GetBillUseCase {
+
+	if s.getBill == nil {
+		s.getBill = service.NewGetBillUseCase(s.repo.BillRepository(ctx))
+	}
+
+	return s.getBill
 }
 
 func (s *ServiceContainer) LoginUser(ctx context.Context) *service.LoginUserUseCase {
