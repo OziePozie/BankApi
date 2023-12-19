@@ -89,10 +89,8 @@ func (handler *GETBillsHandler) ServeHTTP(writer http.ResponseWriter, request *h
 		}
 		responses = append(responses, *response)
 	}
-
-	err = json.NewEncoder(writer).Encode(responses)
-
 	writer.WriteHeader(http.StatusOK)
+	err = json.NewEncoder(writer).Encode(responses)
 
 }
 

@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
 )
@@ -40,6 +41,7 @@ func (r *Repository) GetByName(ctx context.Context, name string) (domain.Bill, e
 	//TODO implement me
 	panic("implement me")
 }
+
 func (r *Repository) FindAllByUserWithILIKE(ctx context.Context, billName string, offset int,
 	limit int, userId uuid.UUID) (*[]domain.Bill, error) {
 	//query := `SELECT bill_uuid, account_uuid, number, sum_limit, name FROM bills WHERE account_uuid = $1   '%' LIMIT $3 OFFSET $4;`
@@ -89,4 +91,64 @@ type Model struct {
 	sum      int
 	limit    int
 	billName string
+}
+
+func (r *Repository) DepositAmount(ctx context.Context, userId uuid.UUID, amount int) (*domain.Bill, error) {
+	tx, err := r.pool.BeginTx(ctx, pgx.TxOptions{})
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback(context.TODO())
+		} else {
+			tx.Commit(context.TODO())
+		}
+	}()
+
+	//bills, err := r.FindAllByUserWithILIKE(ctx, "", 0, 1, userId)
+	//
+	//bill := *bills
+	//id := bill[0].ID()
+
+	query := "SELECT bill_uuid, account_uuid, number, sum_limit, name FROM bills WHERE account_uuid = $1  LIMIT 1 FOR UPDATE"
+
+	row := tx.QueryRow(ctx, query, userId)
+
+	var model Model
+	row.Scan(
+		&model.billId,
+		&model.accId,
+		&model.sum,
+		&model.limit,
+		&model.billName,
+	)
+
+	bill := model.ModelToDomain()
+	log.Print(bill)
+	updateQuery := "UPDATE bills SET number=number+$1 WHERE bill_uuid = $2;"
+
+	_, err = tx.Exec(ctx, updateQuery, amount, bill.ID())
+
+	if err != nil {
+		return nil, err
+	}
+
+	tx.Commit(ctx)
+
+	selectQuery := "SELECT bill_uuid, account_uuid, number, sum_limit, name FROM bills WHERE bill_id = $1;"
+
+	row = r.pool.QueryRow(ctx, selectQuery, bill.ID())
+
+	row.Scan(
+		&model.billId,
+		&model.accId,
+		&model.sum,
+		&model.limit,
+		&model.billName,
+	)
+
+	bill = model.ModelToDomain()
+	log.Print(bill)
+	return &bill, nil
 }
