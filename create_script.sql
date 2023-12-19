@@ -1,14 +1,15 @@
 CREATE table IF NOT EXISTS accounts (
-                                        account_id SERIAL primary key,
-                                        acc_uuid uuid,
+                                        id SERIAL,
+                                        acc_uuid uuid primary key ,
                                         first_Name varchar,
                                         second_Name varchar,
                                         email varchar unique,
                                         password varchar
 );
 CREATE table IF NOT EXISTS bills (
-                                     bill_id SERIAL primary key,
-                                     account_id int references accounts (account_id),
+                                     bill_id SERIAL,
+                                     bill_uuid uuid primary key,
+                                     account_uuid uuid references accounts (acc_uuid),
     number bigint,
     sum_limit int
     );

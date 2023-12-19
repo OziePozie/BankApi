@@ -2,7 +2,7 @@ package utils
 
 import (
 	"BankApi/internal/domain"
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 	"log"
 	"time"
 )
@@ -16,8 +16,8 @@ type CreateTokenUseCase struct {
 func CreateToken(user *domain.User, secretKey string) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	claims["exp"] = time.Now().Add(10 * time.Minute)
-	claims["user"] = user.Name()
+	claims["exp"] = jwt.NewNumericDate(time.Now().Add(10 * time.Minute))
+	claims["user"] = user.ID()
 	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
 		return "", err

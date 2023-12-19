@@ -2,6 +2,7 @@ package di
 
 import (
 	"BankApi/internal/handlers"
+	"BankApi/internal/handlers/middleware"
 	"context"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -60,7 +61,13 @@ func (c *RouterContainer) HTTPRouter(ctx context.Context) http.Handler {
 	router := mux.NewRouter()
 	//router.Use(middleware.AuthMiddleware)
 
-	router.Handle("/bills", c.PostBill(ctx)).Methods(http.MethodPost)
+	router.Use(middleware.PanicRecovery)
+
+	billRouter := router.PathPrefix("/api").Subrouter()
+	billRouter.Use(middleware.AuthMiddleware)
+
+	//router.Handle("/bills", c.PostBill(ctx)).Methods(http.MethodPost)
+	billRouter.Handle("/bills", c.PostBill(ctx)).Methods(http.MethodPost)
 	router.Handle("/register", c.PostRegister(ctx)).Methods(http.MethodPost)
 	router.Handle("/login", c.PostLogin(ctx)).Methods(http.MethodPost)
 	c.router = router
