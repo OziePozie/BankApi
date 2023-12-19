@@ -1,5 +1,6 @@
 CREATE table IF NOT EXISTS accounts (
                                         account_id SERIAL primary key,
+                                        acc_uuid uuid,
                                         first_Name varchar,
                                         second_Name varchar,
                                         email varchar unique,
