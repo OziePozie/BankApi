@@ -15,6 +15,7 @@ type ServiceContainer struct {
 	createUser *service.CreateUserUseCase
 	getBill    *service.GetBillUseCase
 	loginUser  *service.LoginUserUseCase
+	deposit    *service.DepositUseCase
 }
 
 func (s *ServiceContainer) GetBill(ctx context.Context) *service.GetBillUseCase {
@@ -69,4 +70,12 @@ func (s *ServiceContainer) CreateUser(ctx context.Context) *service.CreateUserUs
 
 func (s *ServiceContainer) SetCreateUser(createUser *service.CreateUserUseCase) {
 	s.createUser = createUser
+}
+
+func (s *ServiceContainer) Deposit(ctx context.Context) *service.DepositUseCase {
+
+	if s.deposit == nil {
+		s.deposit = service.NewDepositUseCase(s.repo.BillRepository(ctx))
+	}
+	return s.deposit
 }
