@@ -2,15 +2,15 @@ package user
 
 import (
 	"BankApi/internal/domain"
+	"BankApi/internal/pkg/persistence"
 	"context"
 	"fmt"
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
 )
 
 type Repository struct {
-	pool *pgxpool.Pool
+	conn persistence.Connection
 }
 
 type Model struct {
@@ -20,9 +20,9 @@ type Model struct {
 	password string
 }
 
-func NewUserRepository(pool *pgxpool.Pool) *Repository {
+func NewUserRepository(conn persistence.Connection) *Repository {
 	return &Repository{
-		pool: pool,
+		conn: conn,
 	}
 }
 
@@ -30,7 +30,7 @@ func (r *Repository) Save(ctx context.Context, user *domain.User) error {
 
 	log.Print(user.Email())
 
-	_, err := r.pool.Exec(ctx, "INSERT INTO accounts (acc_uuid,first_name, email, password) values ($1,$2,$3, $4);",
+	_, err := r.conn.Exec(ctx, "INSERT INTO accounts (acc_uuid,first_name, email, password) values ($1,$2,$3, $4);",
 		user.ID(), user.Name(), user.Email(), user.PasswordHash())
 	if err != nil {
 		return fmt.Errorf("insert user: %w", err)
@@ -44,7 +44,7 @@ func (r *Repository) FindByName(ctx context.Context, email string) (*domain.User
 
 	//query := `SELECT account_id, first_name, password FROM accounts WHERE accounts.email=$1::TEXT;`
 
-	row := r.pool.QueryRow(ctx, "SELECT acc_uuid, first_name, email, password FROM accounts WHERE email=$1", email)
+	row := r.conn.QueryRow(ctx, "SELECT acc_uuid, first_name, email, password FROM accounts WHERE email=$1", email)
 
 	var m Model
 

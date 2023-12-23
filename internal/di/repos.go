@@ -2,6 +2,9 @@ package di
 
 import (
 	"BankApi/internal/domain"
+	"BankApi/internal/pkg"
+	"BankApi/internal/pkg/persistence"
+	"BankApi/internal/pkg/persistence/postgres"
 	"BankApi/internal/repository/postgres/bill"
 	"BankApi/internal/repository/postgres/user"
 	"context"
@@ -12,10 +15,29 @@ import (
 type RepoContainer struct {
 	databaseURL string
 
-	postgresPool *pgxpool.Pool
+	postgresPool       persistence.Connection
+	transactionManager *pkg.TransactionManager
 
 	userRepository domain.UserRepository
 	billRepository domain.BillRepository
+}
+
+func (c *RepoContainer) TransactionManager(ctx context.Context) *pkg.TransactionManager {
+
+	if c.transactionManager == nil {
+		transactionManager, err := pgxpool.New(ctx, c.DatabaseURL())
+		if err != nil {
+			panic(err)
+		}
+
+		if err := transactionManager.Ping(ctx); err != nil {
+			panic(err)
+		}
+
+		//c.transactionManager = transactionManager.
+	}
+
+	return c.transactionManager
 }
 
 func NewRepoContainer() *RepoContainer {
@@ -29,7 +51,7 @@ func (c *RepoContainer) DatabaseURL() string {
 
 	return c.databaseURL
 }
-func (c *RepoContainer) Pool(ctx context.Context) *pgxpool.Pool {
+func (c *RepoContainer) Pool(ctx context.Context) persistence.Connection {
 	if c.postgresPool == nil {
 		postgresPool, err := pgxpool.New(ctx, c.DatabaseURL())
 		if err != nil {
@@ -40,7 +62,7 @@ func (c *RepoContainer) Pool(ctx context.Context) *pgxpool.Pool {
 			panic(err)
 		}
 
-		c.postgresPool = postgresPool
+		c.postgresPool = postgres.NewPoolConnection(postgresPool)
 	}
 
 	return c.postgresPool
