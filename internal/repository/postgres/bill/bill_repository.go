@@ -97,8 +97,38 @@ type Model struct {
 	billName string
 }
 
-func (r *Repository) DepositAmount(ctx context.Context, userId uuid.UUID, amount int) (bill2 *domain.Bill, err error) {
-	return nil, nil
+func (r *Repository) DepositAmount(ctx context.Context, billID uuid.UUID, amount int) (balance int, err error) {
+
+	updateQuery := "UPDATE bills SET number=number+$1 WHERE bill_uuid = $2 RETURNING number;"
+
+	row := r.pool.QueryRow(ctx, updateQuery, amount, billID)
+	var newBalance int
+	err = row.Scan(&newBalance)
+	if err != nil {
+		return -1, err
+	}
+
+	return newBalance, nil
+}
+
+func (r *Repository) GetBillByBillIDAndUserIDEquals(ctx context.Context, userID uuid.UUID, billID uuid.UUID) (*domain.Bill, error) {
+	query := `SELECT bill_uuid, account_uuid, number, sum_limit, name FROM bills WHERE account_uuid = $1  AND bill_uuid = $2;`
+	row := r.pool.QueryRow(ctx, query, userID, billID)
+	var model Model
+	err := row.Scan(
+		&model.billId,
+		&model.accId,
+		&model.sum,
+		&model.limit,
+		&model.billName,
+	)
+	log.Print(err)
+	if err != nil {
+		return nil, err
+	}
+
+	bill := model.ModelToDomain()
+	return &bill, nil
 }
 
 //tx, err := r.pool.BeginTx(ctx, pgx.TxOptions{})
@@ -131,11 +161,7 @@ func (r *Repository) DepositAmount(ctx context.Context, userId uuid.UUID, amount
 //		&model.billName,
 //	)
 //
-//	bill := model.ModelToDomain()
-//	log.Print(bill)
-//	updateQuery := "UPDATE bills SET number=number+$1 WHERE bill_uuid = $2;"
-//
-//	_, err = tx.Exec(ctx, updateQuery, amount, bill.ID())
+
 //
 //	if err != nil {
 //		return nil, err
