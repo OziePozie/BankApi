@@ -44,7 +44,10 @@ func (r *Repository) FindByName(ctx context.Context, email string) (*domain.User
 
 	//query := `SELECT account_id, first_name, password FROM accounts WHERE accounts.email=$1::TEXT;`
 
-	row := r.conn.QueryRow(ctx, "SELECT acc_uuid, first_name, email, password FROM accounts WHERE email=$1", email)
+	log.Print(email)
+
+	row := r.conn.QueryRow(ctx, "SELECT acc_uuid, first_name, email, password FROM accounts WHERE email=$1::TEXT",
+		email)
 
 	var m Model
 

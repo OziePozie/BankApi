@@ -4,6 +4,7 @@ import (
 	"BankApi/internal/handlers/middleware"
 	"BankApi/internal/service"
 	"encoding/json"
+	"github.com/gofrs/uuid"
 	"net/http"
 )
 
@@ -16,7 +17,8 @@ func NewPOSTDepositHandler(useCase *service.DepositUseCase) *POSTDepositHandler 
 }
 
 type POSTDepositRequest struct {
-	Amount int `json:"amount"`
+	BillID uuid.UUID `json:"billID"`
+	Amount int       `json:"amount"`
 }
 
 type POSTDepositResponse struct {
@@ -35,6 +37,7 @@ func (handler POSTDepositHandler) ServeHTTP(writer http.ResponseWriter, request 
 
 	command := service.DepositCommand{
 		UserID: userID,
+		BillID: body.BillID,
 		Amount: body.Amount,
 	}
 

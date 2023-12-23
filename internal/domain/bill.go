@@ -60,7 +60,8 @@ type BillRepository interface {
 	GetAll(ctx context.Context) ([]Bill, error)
 	GetByName(ctx context.Context, name string) (Bill, error)
 	FindAllByUserWithILIKE(ctx context.Context, billName string, offset int, limit int, userId uuid.UUID) (*[]Bill, error)
-	DepositAmount(ctx context.Context, userId uuid.UUID, amount int) (bill *Bill, err error)
+	DepositAmount(ctx context.Context, billID uuid.UUID, amount int) (newBalance int, err error)
+	GetBillByBillIDAndUserIDEquals(ctx context.Context, userID uuid.UUID, billID uuid.UUID) (*Bill, error)
 }
 
 func (b *Bill) Validate() error {
