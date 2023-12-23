@@ -2,21 +2,24 @@ package bill
 
 import (
 	"BankApi/internal/domain"
+	"BankApi/internal/pkg/persistence"
 	"context"
 	"fmt"
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"log"
 )
 
 type Repository struct {
-	pool *pgxpool.Pool
+	pool persistence.Connection
 }
 
-func NewBillRepository(pool *pgxpool.Pool) *Repository {
+func NewBillRepository(pool persistence.Connection) *Repository {
 	return &Repository{pool: pool}
 }
+
+//func NewBillRepository(pool *pgxpool.Pool) *Repository {
+//	return &Repository{pool: pool}
+//}
 
 func (r *Repository) Save(ctx context.Context, bill *domain.Bill) error {
 
@@ -47,9 +50,10 @@ func (r *Repository) FindAllByUserWithILIKE(ctx context.Context, billName string
 	//query := `SELECT bill_uuid, account_uuid, number, sum_limit, name FROM bills WHERE account_uuid = $1   '%' LIMIT $3 OFFSET $4;`
 	//rows, err := r.pool.Query(ctx, query, userId, billName, limit, offset)
 
-	//AND name ILIKE $2     "%"+billName+"%",
-	query := `SELECT bill_uuid, account_uuid, number, sum_limit, name FROM bills WHERE account_uuid = $1  LIMIT $2 OFFSET $3;`
-	rows, err := r.pool.Query(ctx, query, userId, limit, offset)
+	//     ,
+	query := `SELECT bill_uuid, account_uuid, number, sum_limit, name FROM bills WHERE account_uuid = $1  AND name ILIKE $2 LIMIT $3 OFFSET $4;`
+	rows, err := r.pool.Query(ctx, query, userId, "%"+billName+"%", limit, offset)
+	defer rows.Close()
 	log.Print(err)
 	if err != nil {
 		return nil, err
@@ -93,62 +97,71 @@ type Model struct {
 	billName string
 }
 
-func (r *Repository) DepositAmount(ctx context.Context, userId uuid.UUID, amount int) (*domain.Bill, error) {
-	tx, err := r.pool.BeginTx(ctx, pgx.TxOptions{})
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		if err != nil {
-			tx.Rollback(context.TODO())
-		} else {
-			tx.Commit(context.TODO())
-		}
-	}()
-
-	//bills, err := r.FindAllByUserWithILIKE(ctx, "", 0, 1, userId)
-	//
-	//bill := *bills
-	//id := bill[0].ID()
-
-	query := "SELECT bill_uuid, account_uuid, number, sum_limit, name FROM bills WHERE account_uuid = $1  LIMIT 1 FOR UPDATE"
-
-	row := tx.QueryRow(ctx, query, userId)
-
-	var model Model
-	row.Scan(
-		&model.billId,
-		&model.accId,
-		&model.sum,
-		&model.limit,
-		&model.billName,
-	)
-
-	bill := model.ModelToDomain()
-	log.Print(bill)
-	updateQuery := "UPDATE bills SET number=number+$1 WHERE bill_uuid = $2;"
-
-	_, err = tx.Exec(ctx, updateQuery, amount, bill.ID())
-
-	if err != nil {
-		return nil, err
-	}
-
-	tx.Commit(ctx)
-
-	selectQuery := "SELECT bill_uuid, account_uuid, number, sum_limit, name FROM bills WHERE bill_id = $1;"
-
-	row = r.pool.QueryRow(ctx, selectQuery, bill.ID())
-
-	row.Scan(
-		&model.billId,
-		&model.accId,
-		&model.sum,
-		&model.limit,
-		&model.billName,
-	)
-
-	bill = model.ModelToDomain()
-	log.Print(bill)
-	return &bill, nil
+func (r *Repository) DepositAmount(ctx context.Context, userId uuid.UUID, amount int) (bill2 *domain.Bill, err error) {
+	return nil, nil
 }
+
+//tx, err := r.pool.BeginTx(ctx, pgx.TxOptions{})
+//	if err != nil {
+//		return nil, err
+//	}
+//	defer func() {
+//		if err != nil {
+//			tx.Rollback(context.TODO())
+//		} else {
+//			tx.Commit(context.TODO())
+//		}
+//	}()
+//
+//	//bills, err := r.FindAllByUserWithILIKE(ctx, "", 0, 1, userId)
+//	//
+//	//bill := *bills
+//	//id := bill[0].ID()
+//
+//	query := "SELECT bill_uuid, account_uuid, number, sum_limit, name FROM bills WHERE account_uuid = $1  LIMIT 1 FOR UPDATE"
+//
+//	row := tx.QueryRow(ctx, query, userId)
+//
+//	var model Model
+//	row.Scan(
+//		&model.billId,
+//		&model.accId,
+//		&model.sum,
+//		&model.limit,
+//		&model.billName,
+//	)
+//
+//	bill := model.ModelToDomain()
+//	log.Print(bill)
+//	updateQuery := "UPDATE bills SET number=number+$1 WHERE bill_uuid = $2;"
+//
+//	_, err = tx.Exec(ctx, updateQuery, amount, bill.ID())
+//
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	err = tx.Commit(ctx)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	selectQuery := "SELECT bill_uuid, account_uuid, number, sum_limit, name FROM bills WHERE bill_uuid = $1;"
+//
+//	row = r.pool.QueryRow(ctx, selectQuery, bill.ID())
+//
+//	var m Model
+//	err = row.Scan(
+//		&m.billId,
+//		&m.accId,
+//		&m.sum,
+//		&m.limit,
+//		&m.billName,
+//	)
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	bill = m.ModelToDomain()
+//	log.Print(m)
+//	return &bill, nil
