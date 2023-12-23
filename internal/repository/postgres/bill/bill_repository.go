@@ -115,7 +115,14 @@ func (r *Repository) GetBillByBillIDAndUserIDEquals(ctx context.Context, userID 
 	query := `SELECT bill_uuid, account_uuid, number, sum_limit, name FROM bills WHERE account_uuid = $1  AND bill_uuid = $2;`
 	row := r.pool.QueryRow(ctx, query, userID, billID)
 	var model Model
-	err := row.Scan(&model)
+	err := row.Scan(
+		&model.billId,
+		&model.accId,
+		&model.sum,
+		&model.limit,
+		&model.billName,
+	)
+	log.Print(err)
 	if err != nil {
 		return nil, err
 	}

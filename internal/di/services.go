@@ -75,7 +75,7 @@ func (s *ServiceContainer) SetCreateUser(createUser *service.CreateUserUseCase) 
 func (s *ServiceContainer) Deposit(ctx context.Context) *service.DepositUseCase {
 
 	if s.deposit == nil {
-		s.deposit = service.NewDepositUseCase(s.repo.BillRepository(ctx))
+		s.deposit = service.NewDepositUseCase(s.repo.BillRepository(ctx), s.repo.TransactionManager(ctx))
 	}
 	return s.deposit
 }

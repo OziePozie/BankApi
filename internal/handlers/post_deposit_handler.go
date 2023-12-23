@@ -5,6 +5,7 @@ import (
 	"BankApi/internal/service"
 	"encoding/json"
 	"github.com/gofrs/uuid"
+	"log"
 	"net/http"
 )
 
@@ -30,7 +31,7 @@ func (handler POSTDepositHandler) ServeHTTP(writer http.ResponseWriter, request 
 
 	var body POSTDepositRequest
 	err := json.NewDecoder(request.Body).Decode(&body)
-
+	log.Print(err)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 	}
